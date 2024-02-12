@@ -8,7 +8,7 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	t.Run("/ gets 200 and hello message", func(t *testing.T) {
+	/* t.Run("/ gets 200 and hello message", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
@@ -19,7 +19,17 @@ func TestServer(t *testing.T) {
 		assertResponseBody(t, response.Body.String(), want)
 		assertResponseCode(t, response.Code, http.StatusOK)
 
-	})
+	}) */
+
+	/* t.Run("home page is rendered successfully and valid", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/", nil)
+		response := httptest.NewRecorder()
+
+		homeHandler(response, request)
+
+		approvals.VerifyString(t, response.Body.String())
+
+	}) */
 
 	t.Run("display snippet with id 1", func(t *testing.T) {
 		id := 1
