@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,16 +21,30 @@ func TestServer(t *testing.T) {
 
 	})
 
-	t.Run("/snippet/view gets 200 and hello message", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/snippet/view", nil)
+	t.Run("display snippet with id 1", func(t *testing.T) {
+		id := 1
+		request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/snippet/view?id=%d", id), nil)
 		response := httptest.NewRecorder()
 
 		snippetViewHandler(response, request)
 
-		want := "Display a specific snippet..."
+		want := fmt.Sprintf("Display a specific snippet with ID %d...", id)
 
 		assertResponseBody(t, response.Body.String(), want)
 		assertResponseCode(t, response.Code, http.StatusOK)
+
+	})
+
+	t.Run("display snippet with invalid id gets 404", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/snippet/view?id=abcdef", nil)
+		response := httptest.NewRecorder()
+
+		snippetViewHandler(response, request)
+
+		want := "404 page not found\n"
+
+		assertResponseBody(t, response.Body.String(), want)
+		assertResponseCode(t, response.Code, http.StatusNotFound)
 
 	})
 
