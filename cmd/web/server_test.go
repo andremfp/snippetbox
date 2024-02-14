@@ -8,35 +8,24 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	/* t.Run("/ gets 200 and hello message", func(t *testing.T) {
+	t.Run("/ gets 200", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
-		homeHandler(response, request)
+		server := &Webserver{}
+		server.ServeHTTP(response, request)
 
-		want := "Hello from Snippetbox"
-
-		assertResponseBody(t, response.Body.String(), want)
 		assertResponseCode(t, response.Code, http.StatusOK)
 
-	}) */
-
-	/* t.Run("home page is rendered successfully and valid", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/", nil)
-		response := httptest.NewRecorder()
-
-		homeHandler(response, request)
-
-		approvals.VerifyString(t, response.Body.String())
-
-	}) */
+	})
 
 	t.Run("display snippet with id 1", func(t *testing.T) {
 		id := 1
 		request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/snippet/view?id=%d", id), nil)
 		response := httptest.NewRecorder()
 
-		snippetViewHandler(response, request)
+		server := &Webserver{}
+		server.ServeHTTP(response, request)
 
 		want := fmt.Sprintf("Display a specific snippet with ID %d...", id)
 
@@ -49,7 +38,8 @@ func TestServer(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/snippet/view?id=abcdef", nil)
 		response := httptest.NewRecorder()
 
-		snippetViewHandler(response, request)
+		server := &Webserver{}
+		server.ServeHTTP(response, request)
 
 		want := "404 page not found\n"
 
@@ -62,7 +52,8 @@ func TestServer(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/snippet/create", nil)
 		response := httptest.NewRecorder()
 
-		snippetCreateHandler(response, request)
+		server := &Webserver{}
+		server.ServeHTTP(response, request)
 
 		want := "Create a new snippet..."
 
@@ -75,7 +66,8 @@ func TestServer(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/snippet/create", nil)
 		response := httptest.NewRecorder()
 
-		snippetCreateHandler(response, request)
+		server := &Webserver{}
+		server.ServeHTTP(response, request)
 
 		want := "Method Not Allowed\n"
 
@@ -95,7 +87,8 @@ func TestServer(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/abcdef", nil)
 		response := httptest.NewRecorder()
 
-		homeHandler(response, request)
+		server := &Webserver{}
+		server.ServeHTTP(response, request)
 
 		want := "404 page not found\n"
 

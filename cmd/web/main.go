@@ -6,12 +6,9 @@ import (
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/snippet/view", snippetViewHandler)
-	mux.HandleFunc("/snippet/create", snippetCreateHandler)
 
+	webserver := &Webserver{}
 	log.Println("Starting server on :4000")
-	err := http.ListenAndServe(":4000", mux)
+	err := http.ListenAndServe(":4000", webserver)
 	log.Fatal(err)
 }

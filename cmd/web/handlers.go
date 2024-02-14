@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/andremfp/snippetbox/internal/html"
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,24 +17,17 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	htmlFiles := []string{
-		"./ui/html/base.html",
-		"./ui/html/partials/nav.html",
-		"./ui/html/pages/home.html",
+		"../../ui/html/base.html",
+		"../../ui/html/partials/nav.html",
+		"../../ui/html/pages/home.html",
 	}
 
-	templateSet, err := template.ParseFiles(htmlFiles...)
+	err := html.RenderTemplate(w, htmlFiles)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
 
-	err = templateSet.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
-
-	w.Write([]byte("Hello from Snippetbox"))
 	w.WriteHeader(http.StatusOK)
 }
 
