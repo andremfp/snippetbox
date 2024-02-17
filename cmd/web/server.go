@@ -1,12 +1,24 @@
 package main
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
-type Webserver struct{}
+type Webserver http.Server
 
-// server.go
-func (p *Webserver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func NewWebserver(addr string, errorLog *log.Logger) *http.Server {
 
+	srv := &http.Server{
+		Addr:     addr,
+		ErrorLog: errorLog,
+		Handler:  NewServeMux(),
+	}
+
+	return srv
+}
+
+func NewServeMux() http.Handler {
 	mux := http.NewServeMux()
 	staticFileHandler := http.FileServer(http.Dir("./ui/static/"))
 
@@ -15,5 +27,5 @@ func (p *Webserver) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux.HandleFunc("/snippet/create", snippetCreateHandler)
 	mux.Handle("/static/", http.StripPrefix("/static", staticFileHandler))
 
-	mux.ServeHTTP(w, r)
+	return mux
 }

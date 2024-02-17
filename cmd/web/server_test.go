@@ -2,109 +2,139 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 func TestServer(t *testing.T) {
+
+	testServer := httptest.NewServer(NewServeMux())
+	testClient := testServer.Client()
+	defer testServer.Close()
+
 	t.Run("root path returns 200", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/", nil)
-		response := httptest.NewRecorder()
+		response, err := testClient.Get(fmt.Sprintf("%s/", testServer.URL))
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
 
-		server := &Webserver{}
-		server.ServeHTTP(response, request)
-
-		assertResponseCode(t, response.Code, http.StatusOK)
+		assertResponseCode(t, response.StatusCode, http.StatusOK)
 
 	})
 
 	t.Run("display snippet with id 1", func(t *testing.T) {
 		id := 1
-		request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/snippet/view?id=%d", id), nil)
-		response := httptest.NewRecorder()
+		response, err := testClient.Get(fmt.Sprintf("%s/snippet/view?id=%d", testServer.URL, id))
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
+		defer response.Body.Close()
 
-		server := &Webserver{}
-		server.ServeHTTP(response, request)
+		got, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Fatalf("could not read response body, %v", err)
+		}
 
 		want := fmt.Sprintf("Display a specific snippet with ID %d...", id)
 
-		assertResponseBody(t, response.Body.String(), want)
-		assertResponseCode(t, response.Code, http.StatusOK)
+		assertResponseBody(t, string(got), want)
+		assertResponseCode(t, response.StatusCode, http.StatusOK)
 
 	})
 
 	t.Run("display snippet with invalid id returns 404", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/snippet/view?id=abcdef", nil)
-		response := httptest.NewRecorder()
+		response, err := testClient.Get(fmt.Sprintf("%s/snippet/view?id=abcdef", testServer.URL))
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
+		defer response.Body.Close()
 
-		server := &Webserver{}
-		server.ServeHTTP(response, request)
+		got, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Fatalf("could not read response body, %v", err)
+		}
 
 		want := "404 page not found\n"
 
-		assertResponseBody(t, response.Body.String(), want)
-		assertResponseCode(t, response.Code, http.StatusNotFound)
+		assertResponseBody(t, string(got), want)
+		assertResponseCode(t, response.StatusCode, http.StatusNotFound)
 
 	})
 
 	t.Run("/snippet/create POST returns 200 and hello message", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodPost, "/snippet/create", nil)
-		response := httptest.NewRecorder()
+		response, err := testClient.Post(fmt.Sprintf("%s/snippet/create", testServer.URL), "", nil)
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
+		defer response.Body.Close()
 
-		server := &Webserver{}
-		server.ServeHTTP(response, request)
+		got, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Fatalf("could not read response body, %v", err)
+		}
 
 		want := "Create a new snippet..."
 
-		assertResponseBody(t, response.Body.String(), want)
-		assertResponseCode(t, response.Code, http.StatusOK)
+		assertResponseBody(t, string(got), want)
+		assertResponseCode(t, response.StatusCode, http.StatusOK)
 
 	})
 
 	t.Run("/snippet/create without POST returns a 405", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/snippet/create", nil)
-		response := httptest.NewRecorder()
+		response, err := testClient.Get(fmt.Sprintf("%s/snippet/create", testServer.URL))
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
+		defer response.Body.Close()
 
-		server := &Webserver{}
-		server.ServeHTTP(response, request)
+		got, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Fatalf("could not read response body, %v", err)
+		}
 
 		want := "Method Not Allowed\n"
 
-		gotAllowHeader := response.Header().Get("Allow")
+		gotAllowHeader := response.Header.Get("Allow")
 		wantAllowHeader := "POST"
 
 		if gotAllowHeader != wantAllowHeader {
 			t.Errorf("got 'Allow' header %q, want %q", gotAllowHeader, wantAllowHeader)
 		}
 
-		assertResponseBody(t, response.Body.String(), want)
-		assertResponseCode(t, response.Code, http.StatusMethodNotAllowed)
+		assertResponseBody(t, string(got), want)
+		assertResponseCode(t, response.StatusCode, http.StatusMethodNotAllowed)
 
 	})
 
 	t.Run("/static/ returns 200", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/static/", nil)
-		response := httptest.NewRecorder()
+		response, err := testClient.Get(fmt.Sprintf("%s/static/", testServer.URL))
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
+		defer response.Body.Close()
 
-		server := &Webserver{}
-		server.ServeHTTP(response, request)
-
-		assertResponseCode(t, response.Code, http.StatusOK)
+		assertResponseCode(t, response.StatusCode, http.StatusOK)
 
 	})
 
 	t.Run("anything else return 404", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/abcdef", nil)
-		response := httptest.NewRecorder()
+		response, err := testClient.Get(fmt.Sprintf("%s/abcdef", testServer.URL))
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
+		defer response.Body.Close()
 
-		server := &Webserver{}
-		server.ServeHTTP(response, request)
+		got, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Fatalf("could not read response body, %v", err)
+		}
 
 		want := "404 page not found\n"
 
-		assertResponseBody(t, response.Body.String(), want)
-		assertResponseCode(t, response.Code, http.StatusNotFound)
+		assertResponseBody(t, string(got), want)
+		assertResponseCode(t, response.StatusCode, http.StatusNotFound)
 
 	})
 }

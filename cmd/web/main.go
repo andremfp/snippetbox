@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"log"
-	"net/http"
+	"os"
 )
 
 func main() {
@@ -11,8 +11,13 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
 
-	webserver := &Webserver{}
-	log.Printf("Starting server on %s", *addr)
-	err := http.ListenAndServe(*addr, webserver)
-	log.Fatal(err)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	webserver := NewWebserver(*addr, errorLog)
+
+	// svr := &http.Server{}
+	infoLog.Printf("Starting server on %s", *addr)
+	err := webserver.ListenAndServe()
+	errorLog.Fatal(err)
 }
