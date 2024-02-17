@@ -34,7 +34,7 @@ func TestServer(t *testing.T) {
 
 	})
 
-	t.Run("display snippet with invalid id gets 404", func(t *testing.T) {
+	t.Run("display snippet with invalid id returns 404", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/snippet/view?id=abcdef", nil)
 		response := httptest.NewRecorder()
 
@@ -48,7 +48,7 @@ func TestServer(t *testing.T) {
 
 	})
 
-	t.Run("/snippet/create POST gets 200 and hello message", func(t *testing.T) {
+	t.Run("/snippet/create POST returns 200 and hello message", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/snippet/create", nil)
 		response := httptest.NewRecorder()
 
@@ -62,7 +62,7 @@ func TestServer(t *testing.T) {
 
 	})
 
-	t.Run("/snippet/create without POST gets a 405", func(t *testing.T) {
+	t.Run("/snippet/create without POST returns a 405", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/snippet/create", nil)
 		response := httptest.NewRecorder()
 
@@ -80,6 +80,17 @@ func TestServer(t *testing.T) {
 
 		assertResponseBody(t, response.Body.String(), want)
 		assertResponseCode(t, response.Code, http.StatusMethodNotAllowed)
+
+	})
+
+	t.Run("/static/ returns 200", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/static/", nil)
+		response := httptest.NewRecorder()
+
+		server := &Webserver{}
+		server.ServeHTTP(response, request)
+
+		assertResponseCode(t, response.Code, http.StatusOK)
 
 	})
 
