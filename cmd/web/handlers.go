@@ -17,9 +17,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	htmlFiles := []string{
-		"../../ui/html/base.html",
-		"../../ui/html/partials/nav.html",
-		"../../ui/html/pages/home.html",
+		"./ui/html/base.html",
+		"./ui/html/partials/nav.html",
+		"./ui/html/pages/home.html",
 	}
 
 	err := html.RenderTemplate(w, htmlFiles)

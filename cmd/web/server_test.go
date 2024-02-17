@@ -8,7 +8,7 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	t.Run("/ gets 200", func(t *testing.T) {
+	t.Run("root path returns 200", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
