@@ -56,7 +56,7 @@ func TestServer(t *testing.T) {
 			t.Fatalf("could not read response body, %v", err)
 		}
 
-		want := "404 page not found\n"
+		want := "Not Found\n"
 
 		assertResponseBody(t, string(got), want)
 		assertResponseCode(t, response.StatusCode, http.StatusNotFound)
@@ -131,7 +131,7 @@ func TestServer(t *testing.T) {
 			t.Fatalf("could not read response body, %v", err)
 		}
 
-		want := "404 page not found\n"
+		want := "Not Found\n"
 
 		assertResponseBody(t, string(got), want)
 		assertResponseCode(t, response.StatusCode, http.StatusNotFound)
