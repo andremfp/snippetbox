@@ -10,7 +10,7 @@ import (
 
 func TestServer(t *testing.T) {
 
-	testServer := httptest.NewServer(NewServeMux())
+	testServer := httptest.NewServer(NewServeMux(&application{}))
 	testClient := testServer.Client()
 	defer testServer.Close()
 
