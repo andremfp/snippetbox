@@ -17,7 +17,7 @@ func TestServer(t *testing.T) {
 	infoLog := log.New(os.Stdout, "INFO_TEST\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR_TEST\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	testServer := httptest.NewServer(NewServeMux(&config.Application{infoLog, errorLog}))
+	testServer := httptest.NewServer(NewServeMux(&config.Application{InfoLog: infoLog, ErrorLog: errorLog}))
 	testClient := testServer.Client()
 	defer testServer.Close()
 
