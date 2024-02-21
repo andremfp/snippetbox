@@ -3,21 +3,14 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
-
-	"github.com/andremfp/snippetbox/internal/html/config"
 )
 
 func TestServer(t *testing.T) {
 
-	infoLog := log.New(os.Stdout, "INFO_TEST\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stdout, "ERROR_TEST\t", log.Ldate|log.Ltime|log.Lshortfile)
-
-	testServer := httptest.NewServer(NewServeMux(&config.Application{InfoLog: infoLog, ErrorLog: errorLog}))
+	testServer := httptest.NewServer(NewServeMux(&application{}))
 	testClient := testServer.Client()
 	defer testServer.Close()
 
