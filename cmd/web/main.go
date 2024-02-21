@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 	"os"
+
+	"github.com/andremfp/snippetbox/internal/html/config"
 )
 
 func main() {
@@ -14,7 +16,12 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	webserver := NewWebserver(*addr, errorLog)
+	app := &config.Application{
+		InfoLog:  infoLog,
+		ErrorLog: errorLog,
+	}
+
+	webserver := NewWebserver(*addr, errorLog, app)
 
 	// svr := &http.Server{}
 	infoLog.Printf("Starting server on %s", *addr)

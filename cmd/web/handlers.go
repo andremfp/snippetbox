@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/andremfp/snippetbox/internal/html"
+	"github.com/andremfp/snippetbox/internal/html/config"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func homeHandler(w http.ResponseWriter, r *http.Request, app *config.Application) {
 	// Prevent / from being catch all
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
@@ -24,7 +24,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := html.RenderTemplate(w, htmlFiles)
 	if err != nil {
-		log.Println(err.Error())
+		app.ErrorLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
@@ -32,7 +32,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func snippetViewHandler(w http.ResponseWriter, r *http.Request) {
+func snippetViewHandler(w http.ResponseWriter, r *http.Request, app *config.Application) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -43,7 +43,7 @@ func snippetViewHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
+func snippetCreateHandler(w http.ResponseWriter, r *http.Request, app *config.Application) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
