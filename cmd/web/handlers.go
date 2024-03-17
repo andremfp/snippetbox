@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/andremfp/snippetbox/internal/database"
 	"github.com/andremfp/snippetbox/internal/html"
 )
 
 type application struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
+	infoLog      *log.Logger
+	errorLog     *log.Logger
+	snippetStore *database.SnippetModel
 }
 
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,5 +52,16 @@ func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	w.Write([]byte("Create a new snippet..."))
+
+	// Dummy data for now
+	title := "O snail"
+	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
+	expires := 7
+
+	id, err := app.snippetStore.Insert(title, content, expires)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
 }

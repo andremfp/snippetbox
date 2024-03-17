@@ -25,13 +25,13 @@ func main() {
 	defer db.Close()
 
 	app := &application{
-		infoLog:  infoLog,
-		errorLog: errorLog,
+		infoLog:      infoLog,
+		errorLog:     errorLog,
+		snippetStore: &database.SnippetModel{DB: db},
 	}
 
 	webserver := NewWebserver(*addr, errorLog, app)
 
-	// svr := &http.Server{}
 	infoLog.Printf("Starting server on %s", *addr)
 	err = webserver.ListenAndServe()
 	errorLog.Fatal(err)
