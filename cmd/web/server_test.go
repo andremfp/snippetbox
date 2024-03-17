@@ -8,11 +8,22 @@ import (
 	"testing"
 )
 
+type StubSnippetStore struct{}
+
+func (s *StubSnippetStore) Insert(title, content string, expires int) (int, error) {
+	return 1, nil
+}
+
 func TestServer(t *testing.T) {
 
 	testApp := &application{}
+	testApp.snippetStore = &StubSnippetStore{}
 	testServer := httptest.NewServer(testApp.NewServeMux())
 	testClient := testServer.Client()
+	testClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+
 	defer testServer.Close()
 
 	t.Run("root path returns 200", func(t *testing.T) {
@@ -64,22 +75,21 @@ func TestServer(t *testing.T) {
 
 	})
 
-	t.Run("/snippet/create POST returns 200 and hello message", func(t *testing.T) {
+	t.Run("/snippet/create POST returns 303 and redirects to snippet view", func(t *testing.T) {
 		response, err := testClient.Post(fmt.Sprintf("%s/snippet/create", testServer.URL), "", nil)
 		if err != nil {
 			t.Fatalf("could not make request to test server, %v", err)
 		}
 		defer response.Body.Close()
 
-		got, err := io.ReadAll(response.Body)
-		if err != nil {
-			t.Fatalf("could not read response body, %v", err)
+		gotRedirect := response.Header.Get("Location")
+		wantRedirect := "/snippet/view?id=1"
+
+		if gotRedirect != wantRedirect {
+			t.Errorf("got redirect %s, want %s", gotRedirect, wantRedirect)
 		}
 
-		want := "Create a new snippet..."
-
-		assertResponseBody(t, string(got), want)
-		assertResponseCode(t, response.StatusCode, http.StatusOK)
+		assertResponseCode(t, response.StatusCode, http.StatusSeeOther)
 
 	})
 

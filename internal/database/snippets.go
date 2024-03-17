@@ -19,6 +19,10 @@ type SnippetModel struct {
 	DB *sql.DB
 }
 
+type Store interface {
+	Insert(title string, content string, expires int) (int, error)
+}
+
 func OpenDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

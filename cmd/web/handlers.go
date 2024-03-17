@@ -13,7 +13,7 @@ import (
 type application struct {
 	infoLog      *log.Logger
 	errorLog     *log.Logger
-	snippetStore *database.SnippetModel
+	snippetStore database.Store
 }
 
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
