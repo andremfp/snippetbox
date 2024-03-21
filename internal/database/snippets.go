@@ -2,10 +2,16 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
+
+type Store interface {
+	Insert(title string, content string, expires int) (int, error)
+	Get(id int) (*Snippet, error)
+}
 
 type Snippet struct {
 	ID      int
@@ -17,10 +23,6 @@ type Snippet struct {
 
 type SnippetModel struct {
 	DB *sql.DB
-}
-
-type Store interface {
-	Insert(title string, content string, expires int) (int, error)
 }
 
 func OpenDB(dsn string) (*sql.DB, error) {
@@ -54,7 +56,23 @@ func (m *SnippetModel) Insert(title string, content string, expires int) (int, e
 }
 
 func (m *SnippetModel) Get(id int) (*Snippet, error) {
-	return nil, nil
+	stmt := `SELECT id, title, content, created, expires FROM snippets
+			WHERE expires > UTC_TIMESTAMP() AND id = ?`
+
+	row := m.DB.QueryRow(stmt, id)
+
+	snippet := &Snippet{}
+
+	err := row.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.Created, &snippet.Expires)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoRecord
+		} else {
+			return nil, err
+		}
+	}
+
+	return snippet, nil
 }
 
 // Return the 10 most recently created snippets

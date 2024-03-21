@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/andremfp/snippetbox/internal/database"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
@@ -30,6 +31,37 @@ func TestSnippetModel(t *testing.T) {
 		}
 
 	})
+
+	t.Run("get snippet successfully", func(t *testing.T) {
+		db, mock := setDbMock(t)
+		defer db.Close()
+		testSnippetStore := database.SnippetModel{DB: db}
+
+		createdDate := time.Now().AddDate(0, 0, -1)
+		expiresDate := time.Now().AddDate(0, 0, +1)
+
+		wantSnippet := &database.Snippet{
+			ID:      1,
+			Title:   "title",
+			Content: "content",
+			Created: createdDate,
+			Expires: expiresDate,
+		}
+
+		mokedDbResponse := sqlmock.NewRows([]string{"id", "title", "content", "created", "expires"}).AddRow(1, "title", "content", createdDate, expiresDate)
+
+		stmt := regexp.QuoteMeta("SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() AND id = ?")
+
+		mock.ExpectQuery(stmt).WithArgs(1).WillReturnRows(mokedDbResponse)
+
+		gotSnippet, _ := testSnippetStore.Get(1)
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("expected sql statement not met, %v", err)
+		}
+
+		assertSnippet(t, gotSnippet, wantSnippet)
+
+	})
 }
 
 func setDbMock(t testing.TB) (*sql.DB, sqlmock.Sqlmock) {
@@ -40,4 +72,11 @@ func setDbMock(t testing.TB) (*sql.DB, sqlmock.Sqlmock) {
 	}
 
 	return db, mock
+}
+
+func assertSnippet(t testing.TB, got, want *database.Snippet) {
+	t.Helper()
+	if got.ID != want.ID || got.Content != want.Content || got.Title != want.Title || got.Created != want.Created || got.Expires != want.Expires {
+		t.Errorf("got snippet %v, want %v", got, want)
+	}
 }
