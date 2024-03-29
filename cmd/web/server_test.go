@@ -30,9 +30,10 @@ func (s *StubSnippetStore) Insert(title, content string, expires int) (int, erro
 }
 
 func (s *StubSnippetStore) Get(id int) (*database.Snippet, error) {
-	if id != 1 {
+	if id > len(s.Snippets) {
 		return nil, database.ErrNoRecord
 	}
+
 	return &s.Snippets[0], nil
 }
 
@@ -86,6 +87,28 @@ func TestServer(t *testing.T) {
 			t.Errorf("got snippet %s, want %s", gotSnippet, wantSnippet)
 		}
 		assertResponseCode(t, getResponse.StatusCode, http.StatusOK)
+
+	})
+
+	t.Run("snippet not found", func(t *testing.T) {
+
+		// Get a snippet that does not exist
+		id := 2
+		response, err := testClient.Get(fmt.Sprintf("%s/snippet/view?id=%d", testServer.URL, id))
+		if err != nil {
+			t.Fatalf("could not make request to test server, %v", err)
+		}
+		defer response.Body.Close()
+
+		got, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Fatalf("could not read response body, %v", err)
+		}
+
+		want := "Not Found\n"
+
+		assertResponseBody(t, string(got), want)
+		assertResponseCode(t, response.StatusCode, http.StatusNotFound)
 
 	})
 
