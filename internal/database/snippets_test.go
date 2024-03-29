@@ -33,6 +33,54 @@ func TestSnippetModel(t *testing.T) {
 
 	})
 
+	t.Run("insert snippet error", func(t *testing.T) {
+		db, mock := setDbMock(t)
+		defer db.Close()
+		testSnippetStore := database.SnippetModel{DB: db}
+
+		stmt := regexp.QuoteMeta("INSERT INTO snippets (title, content, created, expires) VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))")
+
+		mock.ExpectExec(stmt).WithArgs("title", "content", 7).WillReturnError(database.ErrGeneric)
+
+		gotID, gotErr := testSnippetStore.Insert("title", "content", 7)
+		wantID := 0
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("expected sql statement not met, %v", err)
+		}
+
+		if gotID != wantID {
+			t.Errorf("got id %d, want %d", gotID, wantID)
+		}
+		if !errors.Is(gotErr, database.ErrGeneric) {
+			t.Errorf("got error %v, want %v", gotErr, database.ErrGeneric)
+		}
+
+	})
+
+	t.Run("insert snippet result error", func(t *testing.T) {
+		db, mock := setDbMock(t)
+		defer db.Close()
+		testSnippetStore := database.SnippetModel{DB: db}
+
+		stmt := regexp.QuoteMeta("INSERT INTO snippets (title, content, created, expires) VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))")
+
+		mock.ExpectExec(stmt).WithArgs("title", "content", 7).WillReturnResult(sqlmock.NewErrorResult(database.ErrGeneric))
+
+		gotID, gotErr := testSnippetStore.Insert("title", "content", 7)
+		wantID := 0
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("expected sql statement not met, %v", err)
+		}
+
+		if gotID != wantID {
+			t.Errorf("got id %d, want %d", gotID, wantID)
+		}
+		if !errors.Is(gotErr, database.ErrGeneric) {
+			t.Errorf("got error %v, want %v", gotErr, database.ErrGeneric)
+		}
+
+	})
+
 	t.Run("get snippet successfully", func(t *testing.T) {
 		db, mock := setDbMock(t)
 		defer db.Close()
@@ -91,15 +139,15 @@ func TestSnippetModel(t *testing.T) {
 
 		stmt := regexp.QuoteMeta("SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() AND id = ?")
 
-		mock.ExpectQuery(stmt).WithArgs(1).WillReturnError(errors.New("generic error"))
+		mock.ExpectQuery(stmt).WithArgs(1).WillReturnError(database.ErrGeneric)
 
-		_, getErr := testSnippetStore.Get(1)
+		_, gotErr := testSnippetStore.Get(1)
 		if err := mock.ExpectationsWereMet(); err != nil {
 			t.Errorf("expected sql statement not met, %v", err)
 		}
 
-		if getErr.Error() != "generic error" {
-			t.Errorf("got error %s, want %s", getErr.Error(), "generic error")
+		if !errors.Is(gotErr, database.ErrGeneric) {
+			t.Errorf("got error %v, want %v", gotErr, database.ErrGeneric)
 		}
 
 	})
