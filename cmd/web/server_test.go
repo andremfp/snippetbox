@@ -37,6 +37,11 @@ func (s *StubSnippetStore) Get(id int) (*database.Snippet, error) {
 	return &s.Snippets[0], nil
 }
 
+func (s *StubSnippetStore) Latest() ([]*database.Snippet, error) {
+
+	return nil, nil
+}
+
 func TestServer(t *testing.T) {
 
 	testApp := &application{}

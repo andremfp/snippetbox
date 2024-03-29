@@ -151,6 +151,74 @@ func TestSnippetModel(t *testing.T) {
 		}
 
 	})
+
+	t.Run("get latest snippets successfully", func(t *testing.T) {
+		db, mock := setDbMock(t)
+		defer db.Close()
+		testSnippetStore := database.SnippetModel{DB: db}
+
+		createdDate := time.Now().AddDate(0, 0, -1)
+
+		expiredDate := time.Now().AddDate(0, 0, +1)
+
+		wantSnippets := []*database.Snippet{
+			{ID: 1, Title: "title1", Content: "content1", Created: createdDate, Expires: expiredDate},
+			{ID: 2, Title: "title2", Content: "content2", Created: createdDate, Expires: expiredDate},
+			{ID: 3, Title: "title3", Content: "content3", Created: createdDate, Expires: expiredDate},
+			{ID: 4, Title: "title4", Content: "content4", Created: createdDate, Expires: expiredDate},
+			{ID: 5, Title: "title5", Content: "content5", Created: createdDate, Expires: expiredDate},
+			{ID: 6, Title: "title6", Content: "content6", Created: createdDate, Expires: expiredDate},
+			{ID: 7, Title: "title7", Content: "content7", Created: createdDate, Expires: expiredDate},
+			{ID: 8, Title: "title8", Content: "content8", Created: createdDate, Expires: expiredDate},
+			{ID: 9, Title: "title9", Content: "content9", Created: createdDate, Expires: expiredDate},
+			{ID: 10, Title: "title10", Content: "content10", Created: createdDate, Expires: expiredDate},
+		}
+
+		mokedDbResponse := sqlmock.NewRows([]string{"id", "title", "content", "created", "expires"}).
+			AddRow(1, "title1", "content1", createdDate, expiredDate).
+			AddRow(2, "title2", "content2", createdDate, expiredDate).
+			AddRow(3, "title3", "content3", createdDate, expiredDate).
+			AddRow(4, "title4", "content4", createdDate, expiredDate).
+			AddRow(5, "title5", "content5", createdDate, expiredDate).
+			AddRow(6, "title6", "content6", createdDate, expiredDate).
+			AddRow(7, "title7", "content7", createdDate, expiredDate).
+			AddRow(8, "title8", "content8", createdDate, expiredDate).
+			AddRow(9, "title9", "content9", createdDate, expiredDate).
+			AddRow(10, "title10", "content10", createdDate, expiredDate)
+
+		stmt := regexp.QuoteMeta("SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() ORDER BY id DESC LIMIT 10")
+
+		mock.ExpectQuery(stmt).WillReturnRows(mokedDbResponse)
+
+		gotSnippets, _ := testSnippetStore.Latest()
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("expected sql statement not met, %v", err)
+		}
+
+		assertSnippetList(t, gotSnippets, wantSnippets)
+
+	})
+
+	t.Run("get latest snippets generic error", func(t *testing.T) {
+		db, mock := setDbMock(t)
+		defer db.Close()
+		testSnippetStore := database.SnippetModel{DB: db}
+
+		stmt := regexp.QuoteMeta("SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() ORDER BY id DESC LIMIT 10")
+
+		mock.ExpectQuery(stmt).WillReturnError(database.ErrGeneric)
+
+		_, gotErr := testSnippetStore.Latest()
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("expected sql statement not met, %v", err)
+		}
+
+		if !errors.Is(gotErr, database.ErrGeneric) {
+			t.Errorf("got error %v, want %v", gotErr, database.ErrGeneric)
+		}
+
+	})
+
 }
 
 func setDbMock(t testing.TB) (*sql.DB, sqlmock.Sqlmock) {
@@ -167,5 +235,12 @@ func assertSnippet(t testing.TB, got, want *database.Snippet) {
 	t.Helper()
 	if got.ID != want.ID || got.Content != want.Content || got.Title != want.Title || got.Created != want.Created || got.Expires != want.Expires {
 		t.Errorf("got snippet %v, want %v", got, want)
+	}
+}
+
+func assertSnippetList(t testing.TB, got, want []*database.Snippet) {
+	t.Helper()
+	for i := 0; i < len(got); i++ {
+		assertSnippet(t, got[i], want[i])
 	}
 }

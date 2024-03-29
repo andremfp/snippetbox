@@ -11,6 +11,7 @@ import (
 type Store interface {
 	Insert(title string, content string, expires int) (int, error)
 	Get(id int) (*Snippet, error)
+	Latest() ([]*Snippet, error)
 }
 
 type Snippet struct {
@@ -76,6 +77,34 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 }
 
 // Return the 10 most recently created snippets
-func (m *SnippetModel) Lastest() ([]*Snippet, error) {
-	return nil, nil
+func (m *SnippetModel) Latest() ([]*Snippet, error) {
+	stmt := `SELECT id, title, content, created, expires FROM snippets
+WHERE expires > UTC_TIMESTAMP() ORDER BY id DESC LIMIT 10`
+
+	rows, err := m.DB.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	snippets := []*Snippet{}
+
+	for rows.Next() {
+		snippet := &Snippet{}
+
+		err := rows.Scan(&snippet.ID, &snippet.Title, &snippet.Content, &snippet.Created, &snippet.Expires)
+		if err != nil {
+			return nil, err
+		}
+
+		snippets = append(snippets, snippet)
+	}
+
+	// Check any errors during previous iteration
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return snippets, nil
 }
