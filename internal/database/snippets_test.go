@@ -2,6 +2,7 @@ package database_test
 
 import (
 	"database/sql"
+	"errors"
 	"regexp"
 	"testing"
 	"time"
@@ -60,6 +61,46 @@ func TestSnippetModel(t *testing.T) {
 		}
 
 		assertSnippet(t, gotSnippet, wantSnippet)
+
+	})
+
+	t.Run("snippet not found", func(t *testing.T) {
+		db, mock := setDbMock(t)
+		defer db.Close()
+		testSnippetStore := database.SnippetModel{DB: db}
+
+		stmt := regexp.QuoteMeta("SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() AND id = ?")
+
+		mock.ExpectQuery(stmt).WithArgs(10).WillReturnError(sql.ErrNoRows)
+
+		_, getErr := testSnippetStore.Get(10)
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("expected sql statement not met, %v", err)
+		}
+
+		if !errors.Is(getErr, database.ErrNoRecord) {
+			t.Errorf("got error %v, want %v", getErr, database.ErrNoRecord)
+		}
+
+	})
+
+	t.Run("get snippet generic error", func(t *testing.T) {
+		db, mock := setDbMock(t)
+		defer db.Close()
+		testSnippetStore := database.SnippetModel{DB: db}
+
+		stmt := regexp.QuoteMeta("SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() AND id = ?")
+
+		mock.ExpectQuery(stmt).WithArgs(1).WillReturnError(errors.New("generic error"))
+
+		_, getErr := testSnippetStore.Get(1)
+		if err := mock.ExpectationsWereMet(); err != nil {
+			t.Errorf("expected sql statement not met, %v", err)
+		}
+
+		if getErr.Error() != "generic error" {
+			t.Errorf("got error %s, want %s", getErr.Error(), "generic error")
+		}
 
 	})
 }
