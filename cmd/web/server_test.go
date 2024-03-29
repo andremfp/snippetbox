@@ -64,33 +64,21 @@ func TestServer(t *testing.T) {
 
 	})
 
-	t.Run("display snippet with id 1", func(t *testing.T) {
+	t.Run("display existing snippet returns 200", func(t *testing.T) {
 
-		wantSnippet := "&{ID:1 Title:test title Content:test content Created:2024-03-21 16:17:51 +0000 UTC Expires:2024-03-21 17:17:51 +0000 UTC}"
-
-		id := 1
-		// Create an entry
-		createResponse, err := testClient.Post(fmt.Sprintf("%s/snippet/create", testServer.URL), "", nil)
+		// Create a snippet
+		_, err := testClient.Post(fmt.Sprintf("%s/snippet/create", testServer.URL), "", nil)
 		if err != nil {
 			t.Fatalf("could not make request to test server, %v", err)
 		}
-		defer createResponse.Body.Close()
 
+		id := 1
 		// Get the snippet created previously
 		getResponse, err := testClient.Get(fmt.Sprintf("%s/snippet/view?id=%d", testServer.URL, id))
 		if err != nil {
 			t.Fatalf("could not make request to test server, %v", err)
 		}
-		defer getResponse.Body.Close()
 
-		gotSnippet, err := io.ReadAll(getResponse.Body)
-		if err != nil {
-			t.Fatalf("could not read response body, %v", err)
-		}
-
-		if string(gotSnippet) != wantSnippet {
-			t.Errorf("got snippet %s, want %s", gotSnippet, wantSnippet)
-		}
 		assertResponseCode(t, getResponse.StatusCode, http.StatusOK)
 
 	})

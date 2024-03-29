@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/andremfp/snippetbox/internal/database"
+	"github.com/andremfp/snippetbox/internal/html"
 )
 
 type application struct {
@@ -63,7 +64,18 @@ func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", snippet)
+	htmlFiles := []string{
+		"./ui/html/base.html",
+		"./ui/html/partials/nav.html",
+		"./ui/html/pages/view.html",
+	}
+
+	err = html.RenderTemplate(w, htmlFiles, snippet)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 }
 
 func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
