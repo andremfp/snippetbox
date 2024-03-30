@@ -8,12 +8,12 @@ import (
 	"github.com/andremfp/snippetbox/internal/database"
 )
 
-//go:embed ui/html
-var content embed.FS
+//go:embed ui
+var Content embed.FS
 
 func RenderTemplate(w io.Writer, htmlFiles []string, data *database.Snippet) error {
 
-	templateSet, err := template.ParseFS(content, htmlFiles...)
+	templateSet, err := template.ParseFS(Content, htmlFiles...)
 	if err != nil {
 		return err
 	}
