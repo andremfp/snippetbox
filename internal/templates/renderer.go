@@ -4,14 +4,12 @@ import (
 	"embed"
 	"io"
 	"text/template"
-
-	"github.com/andremfp/snippetbox/internal/database"
 )
 
 //go:embed ui
 var Content embed.FS
 
-func RenderTemplate(w io.Writer, htmlFiles []string, data *database.Snippet) error {
+func RenderTemplate(w io.Writer, htmlFiles []string, data TemplateData) error {
 
 	templateSet, err := template.ParseFS(Content, htmlFiles...)
 	if err != nil {

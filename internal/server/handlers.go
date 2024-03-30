@@ -64,13 +64,17 @@ func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	data := templates.TemplateData{
+		Snippet: snippet,
+	}
+
 	htmlFiles := []string{
 		"ui/html/base.html",
 		"ui/html/partials/nav.html",
 		"ui/html/pages/view.html",
 	}
 
-	err = templates.RenderTemplate(w, htmlFiles, snippet)
+	err = templates.RenderTemplate(w, htmlFiles, data)
 	if err != nil {
 		app.serverError(w, err)
 		return

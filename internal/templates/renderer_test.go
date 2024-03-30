@@ -20,7 +20,7 @@ func TestRenderTemplate(t *testing.T) {
 			"ui/html/pages/home.html",
 		}
 
-		if err := templates.RenderTemplate(&buf, htmlFiles, nil); err != nil {
+		if err := templates.RenderTemplate(&buf, htmlFiles, templates.TemplateData{}); err != nil {
 			t.Fatal(err)
 		}
 
@@ -45,7 +45,7 @@ func TestRenderTemplate(t *testing.T) {
 			"ui/html/pages/view.html",
 		}
 
-		if err := templates.RenderTemplate(&buf, htmlFiles, testSnippet); err != nil {
+		if err := templates.RenderTemplate(&buf, htmlFiles, templates.TemplateData{testSnippet}); err != nil {
 			t.Fatal(err)
 		}
 
