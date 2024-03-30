@@ -21,17 +21,19 @@
 </nav>
  <main>
         
+
 <div class='snippet'>
     <div class='metadata'>
-        <strong>title</strong>
+        <strong>title1</strong>
         <span>#1</span>
     </div>
-    <pre><code>content</code></pre>
+    <pre><code>content1</code></pre>
     <div class='metadata'>
         <time>Created: 2024-03-21 16:17:51 +0000 UTC</time>
         <time>Expires: 2024-03-21 17:17:51 +0000 UTC</time>
     </div>
 </div>
+
  </main>
     <footer>Powered by <a href='https://golang.org/'>Go</a></footer> <!-- And include the JavaScript file -->
     <script src="/static/js/main.js" type="text/javascript"></script>

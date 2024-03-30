@@ -30,21 +30,21 @@ func (app *Application) homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
+	data := templates.TemplateData{
+		Snippets: snippets,
 	}
 
-	/* htmlFiles := []string{
-		"./ui/html/base.html",
-		"./ui/html/partials/nav.html",
-		"./ui/html/pages/home.html",
+	htmlFiles := []string{
+		"ui/html/base.html",
+		"ui/html/partials/nav.html",
+		"ui/html/pages/home.html",
 	}
 
-	err := html.RenderTemplate(w, htmlFiles)
+	err = templates.RenderTemplate(w, htmlFiles, data)
 	if err != nil {
 		app.serverError(w, err)
 		return
-	} */
+	}
 }
 
 func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {

@@ -22,7 +22,28 @@
  <main>
         
 <h2>Latest Snippets</h2>
-<p>There's nothing to see here yet!</p>
+
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Created</th>
+        <th>ID</th>
+    </tr>
+    
+    <tr>
+        <td><a href='/snippet/view?id=1'>title1</a></td>
+        <td>2024-03-21 16:17:51 +0000 UTC</td>
+        <td>#1</td>
+    </tr>
+    
+    <tr>
+        <td><a href='/snippet/view?id=2'>title2</a></td>
+        <td>2024-03-21 16:17:51 +0000 UTC</td>
+        <td>#2</td>
+    </tr>
+    
+</table>
+
  </main>
     <footer>Powered by <a href='https://golang.org/'>Go</a></footer> <!-- And include the JavaScript file -->
     <script src="/static/js/main.js" type="text/javascript"></script>
