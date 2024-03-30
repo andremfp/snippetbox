@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"log"
@@ -7,7 +7,7 @@ import (
 
 type Webserver http.Server
 
-func NewWebserver(addr string, errorLog *log.Logger, app *application) *http.Server {
+func NewWebserver(addr string, errorLog *log.Logger, app *Application) *http.Server {
 
 	srv := &http.Server{
 		Addr:     addr,
@@ -18,9 +18,9 @@ func NewWebserver(addr string, errorLog *log.Logger, app *application) *http.Ser
 	return srv
 }
 
-func (app *application) NewServeMux() http.Handler {
+func (app *Application) NewServeMux() http.Handler {
 	mux := http.NewServeMux()
-	staticFileHandler := http.FileServer(http.Dir("./ui/static/"))
+	staticFileHandler := http.FileServer(http.Dir("../ui/static/"))
 
 	mux.HandleFunc("/", app.homeHandler)
 	mux.HandleFunc("/snippet/view", app.snippetViewHandler)

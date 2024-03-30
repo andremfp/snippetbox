@@ -1,4 +1,4 @@
-package html_test
+package templates_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/andremfp/snippetbox/internal/database"
-	"github.com/andremfp/snippetbox/internal/html"
+	"github.com/andremfp/snippetbox/internal/templates"
 	approvals "github.com/approvals/go-approval-tests"
 )
 
@@ -15,12 +15,12 @@ func TestRenderTemplate(t *testing.T) {
 		buf := bytes.Buffer{}
 
 		htmlFiles := []string{
-			"../../ui/html/base.html",
-			"../../ui/html/partials/nav.html",
-			"../../ui/html/pages/home.html",
+			"ui/html/base.html",
+			"ui/html/partials/nav.html",
+			"ui/html/pages/home.html",
 		}
 
-		if err := html.RenderTemplate(&buf, htmlFiles, nil); err != nil {
+		if err := templates.RenderTemplate(&buf, htmlFiles, nil); err != nil {
 			t.Fatal(err)
 		}
 
@@ -40,12 +40,12 @@ func TestRenderTemplate(t *testing.T) {
 		}
 
 		htmlFiles := []string{
-			"../../ui/html/base.html",
-			"../../ui/html/partials/nav.html",
-			"../../ui/html/pages/view.html",
+			"ui/html/base.html",
+			"ui/html/partials/nav.html",
+			"ui/html/pages/view.html",
 		}
 
-		if err := html.RenderTemplate(&buf, htmlFiles, testSnippet); err != nil {
+		if err := templates.RenderTemplate(&buf, htmlFiles, testSnippet); err != nil {
 			t.Fatal(err)
 		}
 

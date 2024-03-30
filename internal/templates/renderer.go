@@ -1,15 +1,19 @@
-package html
+package templates
 
 import (
+	"embed"
 	"io"
 	"text/template"
 
 	"github.com/andremfp/snippetbox/internal/database"
 )
 
+//go:embed ui/html
+var content embed.FS
+
 func RenderTemplate(w io.Writer, htmlFiles []string, data *database.Snippet) error {
 
-	templateSet, err := template.ParseFiles(htmlFiles...)
+	templateSet, err := template.ParseFS(content, htmlFiles...)
 	if err != nil {
 		return err
 	}

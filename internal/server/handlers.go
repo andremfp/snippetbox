@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"errors"
@@ -8,23 +8,23 @@ import (
 	"strconv"
 
 	"github.com/andremfp/snippetbox/internal/database"
-	"github.com/andremfp/snippetbox/internal/html"
+	"github.com/andremfp/snippetbox/internal/templates"
 )
 
-type application struct {
-	infoLog      *log.Logger
-	errorLog     *log.Logger
-	snippetStore database.Store
+type Application struct {
+	InfoLog      *log.Logger
+	ErrorLog     *log.Logger
+	SnippetStore database.Store
 }
 
-func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
+func (app *Application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	// Prevent / from being catch all
 	if r.URL.Path != "/" {
 		app.notFound(w)
 		return
 	}
 
-	snippets, err := app.snippetStore.Latest()
+	snippets, err := app.SnippetStore.Latest()
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -47,14 +47,14 @@ func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	} */
 }
 
-func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {
+func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
 	}
 
-	snippet, err := app.snippetStore.Get(id)
+	snippet, err := app.SnippetStore.Get(id)
 	if err != nil {
 		if errors.Is(err, database.ErrNoRecord) {
 			app.notFound(w)
@@ -65,12 +65,12 @@ func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	htmlFiles := []string{
-		"./ui/html/base.html",
-		"./ui/html/partials/nav.html",
-		"./ui/html/pages/view.html",
+		"ui/html/base.html",
+		"ui/html/partials/nav.html",
+		"ui/html/pages/view.html",
 	}
 
-	err = html.RenderTemplate(w, htmlFiles, snippet)
+	err = templates.RenderTemplate(w, htmlFiles, snippet)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -78,7 +78,7 @@ func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 
 }
 
-func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
+func (app *Application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		app.clientError(w, http.StatusMethodNotAllowed)
@@ -90,7 +90,7 @@ func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
 	expires := 7
 
-	id, err := app.snippetStore.Insert(title, content, expires)
+	id, err := app.SnippetStore.Insert(title, content, expires)
 	if err != nil {
 		app.serverError(w, err)
 	}

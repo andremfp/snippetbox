@@ -1,4 +1,4 @@
-package main
+package server_test
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/andremfp/snippetbox/internal/database"
+	"github.com/andremfp/snippetbox/internal/server"
 )
 
 type StubSnippetStore struct {
@@ -44,8 +45,8 @@ func (s *StubSnippetStore) Latest() ([]*database.Snippet, error) {
 
 func TestServer(t *testing.T) {
 
-	testApp := &application{}
-	testApp.snippetStore = &StubSnippetStore{}
+	testApp := &server.Application{}
+	testApp.SnippetStore = &StubSnippetStore{}
 	testServer := httptest.NewServer(testApp.NewServeMux())
 	testClient := testServer.Client()
 	testClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
@@ -69,14 +70,14 @@ func TestServer(t *testing.T) {
 		// Create a snippet
 		_, err := testClient.Post(fmt.Sprintf("%s/snippet/create", testServer.URL), "", nil)
 		if err != nil {
-			t.Fatalf("could not make request to test server, %v", err)
+			t.Fatalf("could not make create request to test server, %v", err)
 		}
 
 		id := 1
 		// Get the snippet created previously
 		getResponse, err := testClient.Get(fmt.Sprintf("%s/snippet/view?id=%d", testServer.URL, id))
 		if err != nil {
-			t.Fatalf("could not make request to test server, %v", err)
+			t.Fatalf("could not make get request to test server, %v", err)
 		}
 
 		assertResponseCode(t, getResponse.StatusCode, http.StatusOK)

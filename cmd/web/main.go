@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/andremfp/snippetbox/internal/database"
+	"github.com/andremfp/snippetbox/internal/server"
 )
 
 func main() {
@@ -24,13 +25,13 @@ func main() {
 
 	defer db.Close()
 
-	app := &application{
-		infoLog:      infoLog,
-		errorLog:     errorLog,
-		snippetStore: &database.SnippetModel{DB: db},
+	app := &server.Application{
+		InfoLog:      infoLog,
+		ErrorLog:     errorLog,
+		SnippetStore: &database.SnippetModel{DB: db},
 	}
 
-	webserver := NewWebserver(*addr, errorLog, app)
+	webserver := server.NewWebserver(*addr, errorLog, app)
 
 	infoLog.Printf("Starting server on %s", *addr)
 	err = webserver.ListenAndServe()
