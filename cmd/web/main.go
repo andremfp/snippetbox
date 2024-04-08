@@ -7,6 +7,7 @@ import (
 
 	"github.com/andremfp/snippetbox/internal/database"
 	"github.com/andremfp/snippetbox/internal/server"
+	"github.com/andremfp/snippetbox/internal/templates"
 )
 
 func main() {
@@ -25,10 +26,16 @@ func main() {
 
 	defer db.Close()
 
+	templateCache, err := templates.NewTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	app := &server.Application{
-		InfoLog:      infoLog,
-		ErrorLog:     errorLog,
-		SnippetStore: &database.SnippetModel{DB: db},
+		InfoLog:       infoLog,
+		ErrorLog:      errorLog,
+		SnippetStore:  &database.SnippetModel{DB: db},
+		TemplateCache: templateCache,
 	}
 
 	webserver := server.NewWebserver(*addr, errorLog, app)

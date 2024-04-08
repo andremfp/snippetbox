@@ -43,9 +43,10 @@ func (s *StubSnippetStore) Latest() ([]*database.Snippet, error) {
 	return nil, nil
 }
 
+var testApp = &server.Application{}
+
 func TestServer(t *testing.T) {
 
-	testApp := &server.Application{}
 	testApp.SnippetStore = &StubSnippetStore{}
 	testServer := httptest.NewServer(testApp.NewServeMux())
 	testClient := testServer.Client()

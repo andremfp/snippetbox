@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,9 +13,10 @@ import (
 )
 
 type Application struct {
-	InfoLog      *log.Logger
-	ErrorLog     *log.Logger
-	SnippetStore database.Store
+	InfoLog       *log.Logger
+	ErrorLog      *log.Logger
+	SnippetStore  database.Store
+	TemplateCache map[string]*template.Template
 }
 
 func (app *Application) homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,21 +32,11 @@ func (app *Application) homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := templates.TemplateData{
+	data := &templates.TemplateData{
 		Snippets: snippets,
 	}
 
-	htmlFiles := []string{
-		"ui/html/base.html",
-		"ui/html/partials/nav.html",
-		"ui/html/pages/home.html",
-	}
-
-	err = templates.RenderTemplate(w, htmlFiles, data)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	app.Render(w, http.StatusOK, "home.html", data)
 }
 
 func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,21 +56,11 @@ func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	data := templates.TemplateData{
+	data := &templates.TemplateData{
 		Snippet: snippet,
 	}
 
-	htmlFiles := []string{
-		"ui/html/base.html",
-		"ui/html/partials/nav.html",
-		"ui/html/pages/view.html",
-	}
-
-	err = templates.RenderTemplate(w, htmlFiles, data)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	app.Render(w, http.StatusOK, "view.html", data)
 
 }
 
