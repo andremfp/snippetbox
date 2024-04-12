@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/andremfp/snippetbox/internal/middleware"
 	"github.com/andremfp/snippetbox/internal/templates"
 )
 
@@ -30,11 +31,11 @@ func (app *Application) NewServeMux() http.Handler {
 	}
 
 	staticFileHandler := http.FileServer(http.FS(staticDir))
+	mux.Handle("/static/", http.StripPrefix("/static", staticFileHandler))
 
 	mux.HandleFunc("/", app.homeHandler)
 	mux.HandleFunc("/snippet/view", app.snippetViewHandler)
 	mux.HandleFunc("/snippet/create", app.snippetCreateHandler)
-	mux.Handle("/static/", http.StripPrefix("/static", staticFileHandler))
 
-	return mux
+	return middleware.SecureHeaders(mux)
 }
