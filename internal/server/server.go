@@ -37,5 +37,5 @@ func (app *Application) NewServeMux() http.Handler {
 	mux.HandleFunc("/snippet/view", app.snippetViewHandler)
 	mux.HandleFunc("/snippet/create", app.snippetCreateHandler)
 
-	return app.LogRequest(middleware.SecureHeaders(mux))
+	return app.recoverPanic(app.logRequest(middleware.SecureHeaders(mux)))
 }

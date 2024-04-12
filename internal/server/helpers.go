@@ -56,9 +56,22 @@ func (app *Application) newTemplateData(r *http.Request) *templates.TemplateData
 	}
 }
 
-func (app *Application) LogRequest(next http.Handler) http.Handler {
+func (app *Application) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.InfoLog.Printf("%s - %s", r.Method, r.URL.String())
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (app *Application) recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				w.Header().Set("Connection", "close")
+				app.serverError(w, fmt.Errorf("%s", err))
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+
 }
