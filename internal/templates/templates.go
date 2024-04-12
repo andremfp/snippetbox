@@ -4,6 +4,7 @@ import (
 	"embed"
 	"html/template"
 	"path/filepath"
+	"time"
 
 	"github.com/andremfp/snippetbox/internal/database"
 )
@@ -15,6 +16,14 @@ type TemplateData struct {
 	CurrentYear int
 	Snippet     *database.Snippet
 	Snippets    []*database.Snippet
+}
+
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+var functions = template.FuncMap{
+	"humanDate": humanDate,
 }
 
 func NewTemplateCache() (map[string]*template.Template, error) {
@@ -32,7 +41,7 @@ func NewTemplateCache() (map[string]*template.Template, error) {
 			"ui/html/partials/nav.html",
 			page,
 		}
-		ts, err := template.ParseFS(Content, files...)
+		ts, err := template.New(name).Funcs(functions).ParseFS(Content, files...)
 		if err != nil {
 			return nil, err
 		}

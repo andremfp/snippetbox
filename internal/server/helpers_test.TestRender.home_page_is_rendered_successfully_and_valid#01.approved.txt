@@ -29,8 +29,8 @@
     </div>
     <pre><code>content1</code></pre>
     <div class='metadata'>
-        <time>Created: 2024-03-21 16:17:51 &#43;0000 UTC</time>
-        <time>Expires: 2024-03-21 17:17:51 &#43;0000 UTC</time>
+        <time>21 Mar 2024 at 16:17</time>
+        <time>21 Mar 2024 at 17:17</time>
     </div>
 </div>
 
