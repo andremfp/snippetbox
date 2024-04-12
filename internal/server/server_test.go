@@ -3,13 +3,16 @@ package server_test
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/andremfp/snippetbox/internal/database"
 	"github.com/andremfp/snippetbox/internal/server"
+	"github.com/andremfp/snippetbox/internal/templates"
 )
 
 type StubSnippetStore struct {
@@ -43,7 +46,10 @@ func (s *StubSnippetStore) Latest() ([]*database.Snippet, error) {
 	return nil, nil
 }
 
-var testApp = &server.Application{}
+var testApp = &server.Application{
+	InfoLog:  log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+	ErrorLog: log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+}
 
 func TestServer(t *testing.T) {
 
@@ -54,9 +60,17 @@ func TestServer(t *testing.T) {
 		return http.ErrUseLastResponse
 	}
 
+	templateCache, err := templates.NewTemplateCache()
+	if err != nil {
+		t.Errorf("failed to create template cache: %v", err)
+	}
+
+	testApp.TemplateCache = templateCache
+
 	defer testServer.Close()
 
 	t.Run("root path returns 200", func(t *testing.T) {
+
 		response, err := testClient.Get(fmt.Sprintf("%s/", testServer.URL))
 		if err != nil {
 			t.Fatalf("could not make request to test server, %v", err)

@@ -18,7 +18,7 @@ type Application struct {
 	TemplateCache map[string]*template.Template
 }
 
-func (app *Application) homeHandler(w http.ResponseWriter, r *http.Request) {
+func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// Prevent / from being catch all
 	if r.URL.Path != "/" {
 		app.notFound(w)

@@ -55,3 +55,10 @@ func (app *Application) newTemplateData(r *http.Request) *templates.TemplateData
 		CurrentYear: time.Now().Year(),
 	}
 }
+
+func (app *Application) LogRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.InfoLog.Printf("%s - %s", r.Method, r.URL.String())
+		next.ServeHTTP(w, r)
+	})
+}

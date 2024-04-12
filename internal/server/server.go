@@ -33,9 +33,9 @@ func (app *Application) NewServeMux() http.Handler {
 	staticFileHandler := http.FileServer(http.FS(staticDir))
 	mux.Handle("/static/", http.StripPrefix("/static", staticFileHandler))
 
-	mux.HandleFunc("/", app.homeHandler)
+	mux.HandleFunc("/", app.HomeHandler)
 	mux.HandleFunc("/snippet/view", app.snippetViewHandler)
 	mux.HandleFunc("/snippet/create", app.snippetCreateHandler)
 
-	return middleware.SecureHeaders(mux)
+	return app.LogRequest(middleware.SecureHeaders(mux))
 }
