@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 
 	"github.com/andremfp/snippetbox/internal/templates"
 )
@@ -47,4 +48,10 @@ func (app *Application) Render(w http.ResponseWriter, status int, page string, d
 	w.WriteHeader(status)
 
 	buf.WriteTo(w)
+}
+
+func (app *Application) newTemplateData(r *http.Request) *templates.TemplateData {
+	return &templates.TemplateData{
+		CurrentYear: time.Now().Year(),
+	}
 }

@@ -12,8 +12,9 @@ import (
 var Content embed.FS
 
 type TemplateData struct {
-	Snippet  *database.Snippet
-	Snippets []*database.Snippet
+	CurrentYear int
+	Snippet     *database.Snippet
+	Snippets    []*database.Snippet
 }
 
 func NewTemplateCache() (map[string]*template.Template, error) {

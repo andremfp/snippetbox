@@ -46,12 +46,12 @@ func TestRender(t *testing.T) {
 		{
 			name:         "home page is rendered successfully and valid",
 			templateName: "home.html",
-			data:         &templates.TemplateData{Snippets: testSnippets},
+			data:         &templates.TemplateData{CurrentYear: time.Now().Year(), Snippets: testSnippets},
 		},
 		{
 			name:         "view page is rendered successfully and valid",
 			templateName: "view.html",
-			data:         &templates.TemplateData{Snippet: testSnippets[0]},
+			data:         &templates.TemplateData{CurrentYear: time.Now().Year(), Snippet: testSnippets[0]},
 		},
 	}
 

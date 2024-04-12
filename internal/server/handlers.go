@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/andremfp/snippetbox/internal/database"
-	"github.com/andremfp/snippetbox/internal/templates"
 )
 
 type Application struct {
@@ -32,9 +31,8 @@ func (app *Application) homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := &templates.TemplateData{
-		Snippets: snippets,
-	}
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
 
 	app.Render(w, http.StatusOK, "home.html", data)
 }
@@ -56,9 +54,9 @@ func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	data := &templates.TemplateData{
-		Snippet: snippet,
-	}
+	data := app.newTemplateData(r)
+
+	data.Snippet = snippet
 
 	app.Render(w, http.StatusOK, "view.html", data)
 
