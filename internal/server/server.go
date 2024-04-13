@@ -27,6 +27,10 @@ func NewWebserver(addr string, errorLog *log.Logger, app *Application) *http.Ser
 func (app *Application) NewServeMux() http.Handler {
 	router := httprouter.New()
 
+	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.notFound(w)
+	})
+
 	staticDir, err := fs.Sub(templates.Content, "ui/static")
 	if err != nil {
 		app.ErrorLog.Fatal(err)
