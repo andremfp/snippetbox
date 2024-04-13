@@ -31,13 +31,13 @@
     </tr>
     
     <tr>
-        <td><a href='/snippet/view?id=1'>title1</a></td>
+        <td><a href='/snippet/view/1'>title1</a></td>
         <td>21 Mar 2024 at 16:17</td>
         <td>#1</td>
     </tr>
     
     <tr>
-        <td><a href='/snippet/view?id=2'>title2</a></td>
+        <td><a href='/snippet/view/2'>title2</a></td>
         <td>21 Mar 2024 at 16:17</td>
         <td>#2</td>
     </tr>

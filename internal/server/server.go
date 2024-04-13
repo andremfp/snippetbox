@@ -7,6 +7,7 @@ import (
 
 	"github.com/andremfp/snippetbox/internal/middleware"
 	"github.com/andremfp/snippetbox/internal/templates"
+	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 )
 
@@ -24,7 +25,7 @@ func NewWebserver(addr string, errorLog *log.Logger, app *Application) *http.Ser
 }
 
 func (app *Application) NewServeMux() http.Handler {
-	mux := http.NewServeMux()
+	router := httprouter.New()
 
 	staticDir, err := fs.Sub(templates.Content, "ui/static")
 	if err != nil {
@@ -32,13 +33,13 @@ func (app *Application) NewServeMux() http.Handler {
 	}
 
 	staticFileHandler := http.FileServer(http.FS(staticDir))
-	mux.Handle("/static/", http.StripPrefix("/static", staticFileHandler))
+	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", staticFileHandler))
 
-	mux.HandleFunc("/", app.HomeHandler)
-	mux.HandleFunc("/snippet/view", app.snippetViewHandler)
-	mux.HandleFunc("/snippet/create", app.snippetCreateHandler)
+	router.HandlerFunc(http.MethodGet, "/", app.HomeHandler)
+	router.HandlerFunc(http.MethodGet, "/snippet/view/:id", app.snippetViewHandler)
+	router.HandlerFunc(http.MethodPost, "/snippet/create", app.snippetCreatePostHandler)
 
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, middleware.SecureHeaders)
 
-	return standardMiddleware.Then(mux)
+	return standardMiddleware.Then(router)
 }

@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/andremfp/snippetbox/internal/database"
+	"github.com/julienschmidt/httprouter"
 )
 
 type Application struct {
@@ -19,11 +20,6 @@ type Application struct {
 }
 
 func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
-	// Prevent / from being catch all
-	if r.URL.Path != "/" {
-		app.notFound(w)
-		return
-	}
 
 	snippets, err := app.SnippetStore.Latest()
 	if err != nil {
@@ -38,7 +34,10 @@ func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+
+	params := httprouter.ParamsFromContext(r.Context())
+
+	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
@@ -63,11 +62,10 @@ func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *Application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
+	w.Write([]byte("Display the form for creating a new snippet..."))
+}
+
+func (app *Application) snippetCreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Dummy data for now
 	title := "O snail"
@@ -79,5 +77,5 @@ func (app *Application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 		app.serverError(w, err)
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
