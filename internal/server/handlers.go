@@ -69,10 +69,20 @@ func (app *Application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 
 func (app *Application) snippetCreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
-	// Dummy data for now
-	title := "O snail"
-	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
-	expires := 7
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+
+	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
 	id, err := app.SnippetStore.Insert(title, content, expires)
 	if err != nil {

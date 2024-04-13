@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -82,8 +84,21 @@ func TestServer(t *testing.T) {
 
 	t.Run("display existing snippet returns 200", func(t *testing.T) {
 
+		formData := url.Values{
+			"title":   {"test title"},
+			"content": {"test content"},
+			"expires": {"7"},
+		}
+
+		req, err := http.NewRequest("POST", fmt.Sprintf("%s/snippet/create", testServer.URL), strings.NewReader(formData.Encode()))
+		if err != nil {
+			t.Fatalf("could not create POST request: %v", err)
+		}
+
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
 		// Create a snippet
-		_, err := testClient.Post(fmt.Sprintf("%s/snippet/create", testServer.URL), "", nil)
+		_, err = testClient.Do(req)
 		if err != nil {
 			t.Fatalf("could not make create request to test server, %v", err)
 		}
@@ -142,11 +157,24 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("/snippet/create POST returns 303 and redirects to snippet view", func(t *testing.T) {
-		response, err := testClient.Post(fmt.Sprintf("%s/snippet/create", testServer.URL), "", nil)
-		if err != nil {
-			t.Fatalf("could not make request to test server, %v", err)
+
+		formData := url.Values{
+			"title":   {"another test title"},
+			"content": {"another test content"},
+			"expires": {"10"},
 		}
-		defer response.Body.Close()
+
+		req, err := http.NewRequest("POST", fmt.Sprintf("%s/snippet/create", testServer.URL), strings.NewReader(formData.Encode()))
+		if err != nil {
+			t.Fatalf("could not create POST request: %v", err)
+		}
+
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		response, err := testClient.Do(req)
+		if err != nil {
+			t.Fatalf("could not make create request to test server, %v", err)
+		}
 
 		gotRedirect := response.Header.Get("Location")
 		wantRedirect := "/snippet/view/1"
