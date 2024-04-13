@@ -7,6 +7,7 @@ import (
 
 	"github.com/andremfp/snippetbox/internal/middleware"
 	"github.com/andremfp/snippetbox/internal/templates"
+	"github.com/justinas/alice"
 )
 
 type Webserver http.Server
@@ -37,5 +38,7 @@ func (app *Application) NewServeMux() http.Handler {
 	mux.HandleFunc("/snippet/view", app.snippetViewHandler)
 	mux.HandleFunc("/snippet/create", app.snippetCreateHandler)
 
-	return app.recoverPanic(app.logRequest(middleware.SecureHeaders(mux)))
+	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, middleware.SecureHeaders)
+
+	return standardMiddleware.Then(mux)
 }
