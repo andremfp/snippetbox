@@ -32,6 +32,7 @@ func NewTemplateCache() (map[string]*template.Template, error) {
 	pages := []string{
 		"ui/html/pages/home.html",
 		"ui/html/pages/view.html",
+		"ui/html/pages/create.html",
 	}
 
 	for _, page := range pages {

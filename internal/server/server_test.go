@@ -159,31 +159,15 @@ func TestServer(t *testing.T) {
 
 	})
 
-	/* t.Run("/snippet/create GET returns a snippet creation form", func(t *testing.T) {
+	t.Run("/snippet/create GET returns 200", func(t *testing.T) {
 		response, err := testClient.Get(fmt.Sprintf("%s/snippet/create", testServer.URL))
 		if err != nil {
 			t.Fatalf("could not make request to test server, %v", err)
 		}
-		defer response.Body.Close()
 
-		got, err := io.ReadAll(response.Body)
-		if err != nil {
-			t.Fatalf("could not read response body, %v", err)
-		}
+		assertResponseCode(t, response.StatusCode, http.StatusOK)
 
-		want := "Method Not Allowed\n"
-
-		gotAllowHeader := response.Header.Get("Allow")
-		wantAllowHeader := "POST"
-
-		if gotAllowHeader != wantAllowHeader {
-			t.Errorf("got 'Allow' header %q, want %q", gotAllowHeader, wantAllowHeader)
-		}
-
-		assertResponseBody(t, string(got), want)
-		assertResponseCode(t, response.StatusCode, http.StatusMethodNotAllowed)
-
-	}) */
+	})
 
 	t.Run("/static/ returns 200", func(t *testing.T) {
 		response, err := testClient.Get(fmt.Sprintf("%s/static/", testServer.URL))

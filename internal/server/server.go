@@ -41,6 +41,7 @@ func (app *Application) NewServeMux() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/", app.HomeHandler)
 	router.HandlerFunc(http.MethodGet, "/snippet/view/:id", app.snippetViewHandler)
+	router.HandlerFunc(http.MethodGet, "/snippet/create", app.snippetCreateHandler)
 	router.HandlerFunc(http.MethodPost, "/snippet/create", app.snippetCreatePostHandler)
 
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, middleware.SecureHeaders)

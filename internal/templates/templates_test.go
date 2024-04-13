@@ -8,11 +8,12 @@ import (
 
 func TestNewTemplateCache(t *testing.T) {
 
-	numPages := 2
+	numPages := 3
 
 	want := []string{
 		"home.html",
 		"view.html",
+		"create.html",
 	}
 
 	cache, err := templates.NewTemplateCache()
