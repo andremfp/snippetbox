@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/andremfp/snippetbox/internal/database"
 	"github.com/julienschmidt/httprouter"
@@ -17,6 +19,13 @@ type Application struct {
 	ErrorLog      *log.Logger
 	SnippetStore  database.Store
 	TemplateCache map[string]*template.Template
+}
+
+type snippetCreateForm struct {
+	Title       string
+	Content     string
+	Expires     int
+	FieldErrors map[string]string
 }
 
 func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +73,9 @@ func (app *Application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 func (app *Application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 
+	data.Form = snippetCreateForm{
+		Expires: 365,
+	}
 	app.Render(w, http.StatusOK, "create.html", data)
 }
 
@@ -75,16 +87,41 @@ func (app *Application) snippetCreatePostHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-
 	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
-	id, err := app.SnippetStore.Insert(title, content, expires)
+	form := snippetCreateForm{
+		Title:       r.PostForm.Get("title"),
+		Content:     r.PostForm.Get("content"),
+		Expires:     expires,
+		FieldErrors: make(map[string]string),
+	}
+
+	if strings.TrimSpace(form.Title) == "" {
+		form.FieldErrors["title"] = "This field cannot be blank"
+	} else if utf8.RuneCountInString(form.Title) > 100 {
+		form.FieldErrors["title"] = "This field cannot be more than 100 characters long"
+	}
+
+	if strings.TrimSpace(form.Content) == "" {
+		form.FieldErrors["content"] = "This field cannot be blank"
+	}
+
+	if expires != 1 && expires != 7 && expires != 365 {
+		form.FieldErrors["expires"] = "This field must be 1, 7 or 365"
+	}
+
+	if len(form.FieldErrors) > 0 {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.Render(w, http.StatusSeeOther, "create.html", data)
+		return
+	}
+
+	id, err := app.SnippetStore.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(w, err)
 	}

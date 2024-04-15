@@ -16,6 +16,7 @@ type TemplateData struct {
 	CurrentYear int
 	Snippet     *database.Snippet
 	Snippets    []*database.Snippet
+	Form        any
 }
 
 func humanDate(t time.Time) string {

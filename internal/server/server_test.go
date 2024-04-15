@@ -161,7 +161,7 @@ func TestServer(t *testing.T) {
 		formData := url.Values{
 			"title":   {"another test title"},
 			"content": {"another test content"},
-			"expires": {"10"},
+			"expires": {"1"},
 		}
 
 		req, err := http.NewRequest("POST", fmt.Sprintf("%s/snippet/create", testServer.URL), strings.NewReader(formData.Encode()))
@@ -181,6 +181,30 @@ func TestServer(t *testing.T) {
 
 		if gotRedirect != wantRedirect {
 			t.Errorf("got redirect %s, want %s", gotRedirect, wantRedirect)
+		}
+
+		assertResponseCode(t, response.StatusCode, http.StatusSeeOther)
+
+	})
+
+	t.Run("/snippet/create POST with invalid form data returns 303", func(t *testing.T) {
+
+		formData := url.Values{
+			"title":   {""},
+			"content": {"another test content"},
+			"expires": {"1"},
+		}
+
+		req, err := http.NewRequest("POST", fmt.Sprintf("%s/snippet/create", testServer.URL), strings.NewReader(formData.Encode()))
+		if err != nil {
+			t.Fatalf("could not create POST request: %v", err)
+		}
+
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		response, err := testClient.Do(req)
+		if err != nil {
+			t.Fatalf("could not make create request to test server, %v", err)
 		}
 
 		assertResponseCode(t, response.StatusCode, http.StatusSeeOther)
