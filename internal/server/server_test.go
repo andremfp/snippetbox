@@ -15,6 +15,7 @@ import (
 	"github.com/andremfp/snippetbox/internal/database"
 	"github.com/andremfp/snippetbox/internal/server"
 	"github.com/andremfp/snippetbox/internal/templates"
+	"github.com/go-playground/form/v4"
 )
 
 type StubSnippetStore struct {
@@ -49,8 +50,9 @@ func (s *StubSnippetStore) Latest() ([]*database.Snippet, error) {
 }
 
 var testApp = &server.Application{
-	InfoLog:  log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
-	ErrorLog: log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+	InfoLog:     log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+	ErrorLog:    log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+	FormDecoder: form.NewDecoder(),
 }
 
 func TestServer(t *testing.T) {

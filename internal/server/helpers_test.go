@@ -3,12 +3,15 @@ package server_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/andremfp/snippetbox/internal/database"
+	"github.com/andremfp/snippetbox/internal/server"
 	"github.com/andremfp/snippetbox/internal/templates"
 	approvals "github.com/approvals/go-approval-tests"
+	"github.com/go-playground/form/v4"
 )
 
 var testSnippets = []*database.Snippet{
@@ -66,5 +69,82 @@ func TestRender(t *testing.T) {
 
 		})
 
+	}
+}
+
+func TestDecodePostForm(t *testing.T) {
+	type testDestinationForm struct {
+		Key1 string `form:"key1"`
+		Key2 string `form:"key2"`
+	}
+
+	var dst testDestinationForm
+
+	tests := []struct {
+		name      string
+		formData  string
+		expectErr bool
+		dst       *testDestinationForm
+	}{
+		{
+			name:      "Success case",
+			formData:  "key1=value1&key2=value2",
+			dst:       &dst,
+			expectErr: false,
+		},
+		{
+			name:      "Parsing form failure",
+			formData:  "",
+			dst:       nil,
+			expectErr: true,
+		},
+
+		{
+			name:      "Decoding form data failure",
+			formData:  "key1=value1&key2=value2",
+			dst:       nil,
+			expectErr: true,
+		},
+	}
+
+	app := &server.Application{
+		FormDecoder: form.NewDecoder(),
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if tt.formData == "" {
+				req, err := http.NewRequest("POST", "/example", nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = app.DecodePostForm(req, tt.dst)
+
+				if err == nil {
+					t.Error("Expected error, got nil")
+				}
+			} else {
+				req := httptest.NewRequest("POST", "/test", strings.NewReader(tt.formData))
+
+				defer func() {
+					if r := recover(); r != nil {
+						t.Logf("Panic occurred as expected: %v", r)
+					} else {
+						if tt.dst == nil {
+							t.Errorf("Expected panic, but got none")
+						}
+					}
+				}()
+
+				err := app.DecodePostForm(req, tt.dst)
+
+				if err != nil {
+					t.Errorf("Expected no error, but got %v", err)
+				}
+			}
+
+		})
 	}
 }

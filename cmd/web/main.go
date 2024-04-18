@@ -8,6 +8,7 @@ import (
 	"github.com/andremfp/snippetbox/internal/database"
 	"github.com/andremfp/snippetbox/internal/server"
 	"github.com/andremfp/snippetbox/internal/templates"
+	"github.com/go-playground/form/v4"
 )
 
 func main() {
@@ -36,6 +37,7 @@ func main() {
 		ErrorLog:      errorLog,
 		SnippetStore:  &database.SnippetModel{DB: db},
 		TemplateCache: templateCache,
+		FormDecoder:   form.NewDecoder(),
 	}
 
 	webserver := server.NewWebserver(*addr, errorLog, app)

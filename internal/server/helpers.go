@@ -2,12 +2,14 @@ package server
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
 	"time"
 
 	"github.com/andremfp/snippetbox/internal/templates"
+	"github.com/go-playground/form/v4"
 )
 
 func (app *Application) serverError(w http.ResponseWriter, err error) {
@@ -74,4 +76,25 @@ func (app *Application) recoverPanic(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 
+}
+
+func (app *Application) DecodePostForm(r *http.Request, dst any) error {
+
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	err = app.FormDecoder.Decode(dst, r.PostForm)
+	if err != nil {
+		var invalidDecoderError *form.InvalidDecoderError
+
+		if errors.As(err, &invalidDecoderError) {
+			panic(err)
+		}
+
+		return err
+	}
+
+	return nil
 }
